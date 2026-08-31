@@ -32,3 +32,18 @@
   ],
   "exclude": ["node_modules"]
 }
+
+{
+  "compilerOptions": {
+    "target": "ES2022",                          /* Specify ECMAScript target version */
+    "module": "CommonJS",                        /* Specify module code generation */
+    // "moduleResolution": "node",                  /* How modules get resolved */
+    "rootDir": "./src",                          /* Source folder of your TS files */
+    "outDir": "./dist",                          /* Output folder for compiled JS */
+    "strict": true,                              /* Enable all strict type-checking options */
+    "esModuleInterop": true,                     /* Emits additional JavaScript to ease support for importing CommonJS modules */
+    "skipLibCheck": true,                        /* Skip type checking of declaration files */
+    "forceConsistentCasingInFileNames": true     /* Disallow inconsistently-cased references to the same file */
+  },
+  "include": ["src/**/*"]                        /* Tells TS to only compile files inside the src folder */
+}
