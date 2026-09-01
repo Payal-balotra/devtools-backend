@@ -5,6 +5,7 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from ".
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
+  console.log("request arrived");
     if(!email || !password){
         return res.status(400).json({ message: "Email and password are required" });
     }
