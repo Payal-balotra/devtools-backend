@@ -8,4 +8,9 @@ export default defineConfig({
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
+  // Add this block to keep everything inside the public schema
+  migrations: {
+    table: "__drizzle_migrations",
+    schema: "public",
+  }
 });

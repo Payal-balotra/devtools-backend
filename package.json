@@ -10,6 +10,7 @@
     "start": "node dist/server.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:run": "tsx src/db/db.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
@@ -18,6 +19,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/node": "^26.4.0",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^1.0.0-rc.4",
@@ -28,6 +30,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^1.0.0-rc.4",
