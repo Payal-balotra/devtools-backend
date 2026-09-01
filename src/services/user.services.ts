@@ -14,4 +14,15 @@ export const findUserByEmail = async (email: string) => {
   return user;
 }
 
+export const createUser = async (name: string, email: string, password: string) => {
+    const [user] = await db
+    .insert(users) 
+    .values({ name, email, password })
+    .returning();
+
+  return user;
+}
+
+
+
 

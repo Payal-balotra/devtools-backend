@@ -4,11 +4,13 @@ import { testConnection } from "./db/db";
 import routes from "./routes/index";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const port = 5000;
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(
   cors({
