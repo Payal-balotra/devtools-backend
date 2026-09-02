@@ -1,5 +1,6 @@
+import { config } from "dotenv";
 import "dotenv/config";
-import Jwt from "jsonwebtoken";
+import Jwt, { JwtPayload } from "jsonwebtoken";
 
 const secretKey = process.env.SECRET_KEY;
 
@@ -46,3 +47,7 @@ export const verifyRefreshToken = (token: string) => {
     throw new Error("Invalid or expired token");
     }
 }
+export const verifyJwtToken = (token: string) => {
+  const decoded = Jwt.verify(token, secretKey) as JwtPayload;
+  return decoded;
+} 

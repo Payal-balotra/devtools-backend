@@ -1,11 +1,13 @@
 import express from "express";
-import { create, getAllProjects, getProjectById } from "../controller/projects.controller";
+import { create, deleteProject, getAllProjects, getProjectById } from "../controller/projects.controller";
+import { verifyToken } from "../middlewares/auth.middleware";
 
 
 const router = express.Router();
 
-router.get("/getAll", getAllProjects);
-router.post("/create", create);
-router.get("/getById/:id", getProjectById);
+router.get("/getAll", verifyToken, getAllProjects);
+router.post("/create", verifyToken, create);
+router.get("/getById/:id", verifyToken, getProjectById);
+router.delete("/delete/:id", verifyToken, deleteProject);
 
 export default router;
