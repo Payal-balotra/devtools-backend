@@ -1,7 +1,7 @@
   import { type Request, type Response } from "express";
-  import { createUser, findUserByEmail } from "../services/user.services";
+  import { createUser, findUserByEmail, findUserById } from "../services/user.services";
   import { comparePassword, hashPassword } from "../lib/bcrypt";
-  import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../lib/jwt";
+  import { generateAccessToken, generateRefreshToken, verifyAccessToken, verifyRefreshToken } from "../lib/jwt";
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -73,26 +73,66 @@ export const refreshToken = (req: Request, res: Response) => {
   const token = req.cookies.refreshToken;
 
   if (!token) {
-    return res.status(401).json({
-      message: "Refresh token is required",
-    });
+    return res.status(401).json({ message: "Refresh token is required" });
   }
 
   const userId = verifyRefreshToken(token);
-
   if (!userId) {
-    return res.status(401).json({
-      message: "Invalid or expired refresh token",
-    });
+    return res.status(401).json({ message: "Invalid or expired refresh token" });
   }
 
   const accessToken = generateAccessToken(userId);
 
-  return res.status(200).json({
-    message: "Access token refreshed",
-    accessToken,
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    maxAge: 2 * 60 * 1000,
   });
+
+  return res.status(200).json({ message: "Access token refreshed" });
 };
 
 
 
+export const getUserInfo = async (req: Request, res: Response) => {
+  const token = req.cookies.accessToken;
+
+  if (!token) {
+    return res.status(401).json({
+      message: "Access token is required",
+    });
+  }
+
+  const userId = verifyAccessToken(token); 
+  if (!userId) {
+    return res.status(401).json({
+      message: "Invalid or expired access token",
+    });
+  }
+
+  const user = await findUserById(Number(userId));
+  if (!user) {  
+    return res.status(404).json({
+      message: "User not found",
+    });
+  }
+
+
+  return res.status(200).json({
+    message: "User info retrieved successfully",
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+  });
+};
+
+
+export const logout = (req: Request, res: Response) => {
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+
+  return res.status(200).json({ message: "Logged out successfully" });
+}

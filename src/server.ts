@@ -1,13 +1,12 @@
 import express from "express";
 import cors from "cors";
-import { testConnection } from "./db/db";
 import routes from "./routes/index";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 
 const app = express();
-const port = 5000;
+const PORT = Number(process.env.PORT) || 5000;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -42,15 +41,28 @@ app.get("/health", (req, res) => {
     message: "Server is running",
   });
 });
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Welcome to the API",
+  });
+});
 
 app.use("/api", routes);
 
 async function startServer() {
-  await testConnection();
+    console.log("START SERVER CALLED");
 
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+
+  server.on("error", (error) => {
+    console.error("SERVER ERROR:", error);
   });
 }
 
-startServer();
+startServer().catch((error) => {
+  console.error("START SERVER ERROR:", error);
+  process.exit(1);
+});

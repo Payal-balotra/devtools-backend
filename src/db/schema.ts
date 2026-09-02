@@ -1,6 +1,7 @@
 import {
   pgTable,
   serial,
+  integer,
   varchar,
   timestamp,
 } from "drizzle-orm/pg-core";
@@ -26,7 +27,7 @@ export const users = pgTable("users", {
 });
 
 export const projects = pgTable("projects", {
-  id: serial("id").primaryKey(),
+  id: integer("id").primaryKey(),
   name: varchar("name", {
     length: 255,
   }).notNull(),
@@ -37,8 +38,22 @@ export const projects = pgTable("projects", {
   createdAt: timestamp("created_at")
     .defaultNow()
     .notNull(),
-  userId: serial("user_id") 
+  userId: integer("user_id") 
 
     .notNull()
     .references(() => users.id),
+});
+
+
+export const subscriptions = pgTable("subscriptions", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  projectId: integer("project_id")
+    .notNull()
+    .references(() => projects.id),
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
 });

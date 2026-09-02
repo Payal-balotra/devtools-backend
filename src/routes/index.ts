@@ -1,9 +1,10 @@
-import Router from 'express';
-import authRoutes from './auth';
+    import Router from 'express';
+    import authRoutes from './auth';
+    import projectsRoutes from './projects';
 
+    const router = Router();
 
-const router = Router();
+    router.use('/auth', authRoutes);
+    router.use('/projects',projectsRoutes);
 
-router.use('/auth', authRoutes);
-
-export default router;
+    export default router;
