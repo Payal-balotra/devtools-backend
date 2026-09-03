@@ -73,26 +73,32 @@ export const refreshToken = (req: Request, res: Response) => {
   const token = req.cookies.refreshToken;
 
   if (!token) {
-    return res.status(401).json({ message: "Refresh token is required" });
+    return res.status(401).json({
+      message: "Refresh token is required",
+    });
   }
 
-  const userId = verifyRefreshToken(token);
-  if (!userId) {
-    return res.status(401).json({ message: "Invalid or expired refresh token" });
+  try {
+    const userId = verifyRefreshToken(token);
+
+    const accessToken = generateAccessToken(userId);
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 2 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      message: "Access token refreshed",
+    });
+  } catch {
+    return res.status(401).json({
+      message: "Invalid or expired refresh token",
+    });
   }
-
-  const accessToken = generateAccessToken(userId);
-
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-    maxAge: 2 * 60 * 1000,
-  });
-
-  return res.status(200).json({ message: "Access token refreshed" });
 };
-
 
 
 export const getUserInfo = async (req: Request, res: Response) => {

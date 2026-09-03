@@ -4,8 +4,15 @@ import routes from "./routes/index";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import { stripeWebhook } from "./controller/subscription.controller";
 
 const app = express();
+
+app.post(
+  "/api/subscription/webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhook
+);
 const PORT = Number(process.env.PORT) || 5000;
 
 app.use(express.json());

@@ -46,14 +46,40 @@ export const projects = pgTable("projects", {
 
 
 export const subscriptions = pgTable("subscriptions", {
-  id: integer("id").primaryKey(),
+  id: serial("id").primaryKey(),
+
   userId: integer("user_id")
     .notNull()
     .references(() => users.id),
-  projectId: integer("project_id")
-    .notNull()
-    .references(() => projects.id),
+
+  stripeCustomerId: varchar("stripe_customer_id", {
+    length: 255,
+  }).notNull(),
+
+  stripeSubscriptionId: varchar("stripe_subscription_id", {
+    length: 255,
+  }).notNull()
+    .unique(),
+
+  status: varchar("status", {
+    length: 50,
+  }).notNull(),
+
+  priceId: varchar("price_id", {
+    length: 255,
+  }).notNull(),
+
+  currentPeriodStart: timestamp("current_period_start")
+    .notNull(),
+
+  currentPeriodEnd: timestamp("current_period_end")
+    .notNull(),
+
   createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
+
+  updatedAt: timestamp("updated_at")
     .defaultNow()
     .notNull(),
 });
