@@ -4,13 +4,45 @@ import { stripe } from "../lib/stripe";
 import { getSubscriptionByUserId, createSubscription, updateSubscriptionByStripeId, cancelSubscriptionByStripeId, } from "../services/subscription.services";
 
 // Create Stripe Checkout Session
+
+type Plan = "basic" | "pro";
+
+
 export const createCheckoutSession = async (
     req: Request,
     res: Response
 ) => {
     try {
+        const PRICE_IDS = {
+            basic: process.env.STRIPE_BASIC_PRICE_ID!,
+            pro: process.env.STRIPE_PRO_PRICE_ID!,
+        };
+
         const userId = req.user?.id;
         const userEmail = req.user?.email;
+        const { plan } = req.body as { plan: Plan };
+
+        if (plan !== "basic" && plan !== "pro") {
+            return res.status(400).json({
+                message: "Invalid plan",
+            });
+        }
+
+
+        console.log(plan)
+        const priceId = PRICE_IDS[plan];
+        if (!userId || !userEmail) {
+            return res.status(401).json({
+                message: "Unauthorized",
+            });
+        }
+
+        if (plan !== "basic" && plan !== "pro") {
+            return res.status(400).json({
+                message: "Invalid plan",
+            });
+        }
+
 
         const session = await stripe.checkout.sessions.create({
             mode: "subscription",
@@ -19,7 +51,7 @@ export const createCheckoutSession = async (
 
             line_items: [
                 {
-                    price: process.env.STRIPE_PRICE_ID!,
+                    price: priceId,
                     quantity: 1,
                 },
             ],
@@ -27,8 +59,18 @@ export const createCheckoutSession = async (
             success_url: `${process.env.FRONTEND_URL}/payment/success`,
             cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
 
+            // Metadata on Checkout Session
             metadata: {
-                userId: userId.toString(),
+                userId: String(userId),
+                plan,
+            },
+
+            // Metadata on Stripe Subscription
+            subscription_data: {
+                metadata: {
+                    userId: String(userId),
+                    plan,
+                },
             },
         });
 
@@ -45,34 +87,33 @@ export const createCheckoutSession = async (
     }
 };
 
-
 export const getSubscription = async (
-  req: Request,
-  res: Response
+    req: Request,
+    res: Response
 ) => {
-  try {
-    const userId = req.user?.id;
+    try {
+        const userId = req.user?.id;
 
-    if (!userId) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
+        if (!userId) {
+            return res.status(401).json({
+                message: "Unauthorized",
+            });
+        }
+
+        const subscription = await getSubscriptionByUserId(userId);
+
+        return res.status(200).json({
+            message: "Subscription fetched",
+            subscription: subscription || null,
+        });
+    } catch (error) {
+        console.error("GET SUBSCRIPTION ERROR:", error);
+
+        return res.status(500).json({
+            message: "Failed to get subscription",
+        });
     }
-
-    const subscription = await getSubscriptionByUserId(userId);
-
-    return res.status(200).json({
-      message: "Subscription fetched",
-      subscription: subscription || null,
-    });
-  } catch (error) {
-    console.error("GET SUBSCRIPTION ERROR:", error);
-
-    return res.status(500).json({
-      message: "Failed to get subscription",
-    });
-  }
-};  
+};
 
 
 export const cancelSubscription = async (
