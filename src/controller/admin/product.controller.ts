@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
-import { createProduct } from "../../services/stripe/product.service";
+import {
+  createProduct,
+  getAllProducts,
+} from "../../services/stripe/product.service";
 
 export const createProductController = async (
   req: Request,
@@ -29,5 +32,18 @@ export const createProductController = async (
     return res.status(500).json({
       message: "Failed to create product",
     });
+  }
+};
+
+export const adminGetProducts = async (
+  _req: Request,
+  res: Response
+) => {
+  try {
+    const products = await getAllProducts();
+    return res.status(200).json({ products });
+  } catch (error) {
+    console.error("ADMIN GET PRODUCTS ERROR:", error);
+    return res.status(500).json({ message: "Failed to get products" });
   }
 };

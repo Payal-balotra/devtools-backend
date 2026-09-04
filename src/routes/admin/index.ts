@@ -3,6 +3,7 @@ import productsRoutes from "../admin/product.routes"
 import pricesRoutes from "../admin/price.routes"
 import subscriptionRoutes from "../admin/subscription.routes"
 import paymentRoutes from "../admin/payment.routes"
+import userRoutes from "../admin/user.routes"
 import { stripe } from '../../lib/stripe';
 
 const router = Router();
@@ -11,6 +12,7 @@ router.use('/products', productsRoutes)
 router.use('/prices', pricesRoutes);
 router.use('/subscriptions', subscriptionRoutes)
 router.use('/payments', paymentRoutes)
+router.use('/users', userRoutes)
 
 router.post("/coupons", async (req, res) => {
   try {

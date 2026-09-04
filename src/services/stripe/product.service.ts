@@ -16,3 +16,8 @@ export const createProduct = async ({
 
   return product;
 };
+
+export const getAllProducts = async () => {
+  const list = await stripe.products.list({ limit: 100 });
+  return list.data;
+};
