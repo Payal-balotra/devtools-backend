@@ -2,6 +2,10 @@ import { Request, Response } from "express";
 import Stripe from "stripe";
 import { stripe } from "../lib/stripe";
 import { getSubscriptionByUserId, createSubscription, updateSubscriptionByStripeId, cancelSubscriptionByStripeId, } from "../services/subscription.services";
+import {
+  syncPaymentFromIntent,
+  syncRefundFromStripe,
+} from "../services/payment.service";
 
 // Create Stripe Checkout Session
 
@@ -352,6 +356,62 @@ export const stripeWebhook = async (
                     subscription.id
                 );
 
+                break;
+            }
+
+            // ----------------------------------
+            // PAYMENT INTENT SUCCEEDED
+            // ----------------------------------
+            case "payment_intent.succeeded": {
+                const intent = event.data.object as Stripe.PaymentIntent;
+                await syncPaymentFromIntent(intent);
+                console.log("Payment succeeded:", intent.id);
+                break;
+            }
+
+            // ----------------------------------
+            // PAYMENT INTENT FAILED
+            // ----------------------------------
+            case "payment_intent.payment_failed": {
+                const intent = event.data.object as Stripe.PaymentIntent;
+                await syncPaymentFromIntent(intent);
+                console.log(
+                    "Payment failed:",
+                    intent.id,
+                    intent.last_payment_error?.message
+                );
+                break;
+            }
+
+            // ----------------------------------
+            // PAYMENT INTENT CANCELED
+            // ----------------------------------
+            case "payment_intent.canceled": {
+                const intent = event.data.object as Stripe.PaymentIntent;
+                await syncPaymentFromIntent(intent);
+                break;
+            }
+
+            // ----------------------------------
+            // REFUND CREATED / UPDATED
+            // ----------------------------------
+            case "charge.refunded": {
+                const charge = event.data.object as Stripe.Charge;
+                if (charge.payment_intent) {
+                    const pi = await stripe.paymentIntents.retrieve(
+                        typeof charge.payment_intent === "string"
+                            ? charge.payment_intent
+                            : charge.payment_intent.id
+                    );
+                    await syncPaymentFromIntent(pi);
+                }
+                break;
+            }
+
+            case "refund.created":
+            case "refund.updated": {
+                const refund = event.data.object as Stripe.Refund;
+                await syncRefundFromStripe(refund);
                 break;
             }
 
